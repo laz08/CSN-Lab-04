@@ -1,0 +1,47 @@
+---
+title: "CSN4"
+author: "Carolina Jorge"
+date: "6 de Novembro de 2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r}
+require(igraph)
+karate <- graph.famous("Zachary")
+wc <- walktrap.community(karate)
+(modularity(wc))
+(membership(wc))
+plot(wc, karate)
+```
+
+
+
+```{r}
+ebet <- edge.betweenness.community(karate)
+fastgreed <- fastgreedy.community(karate)
+labelprop <- label.propagation.community(karate)
+ev <- leading.eigenvector.community(karate)
+multilevel <- multilevel.community(karate)
+optimal <- optimal.community(karate)
+spinglass <- spinglass.community(karate)
+walktrap <- walktrap.community(karate)
+infomap <- infomap.community(karate)
+```
+
+
+```{r}
+membership(ebet)
+
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.

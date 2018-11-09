@@ -1,0 +1,9 @@
+.RData
+.Rhistory
+*/.RData
+*/.Rhistory
+*/report_cache
+*/report_files
+.Rproj.user
+**.RData
+**.Rproj

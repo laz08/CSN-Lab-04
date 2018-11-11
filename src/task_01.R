@@ -50,8 +50,25 @@ communitiesNames = c("edge.betweenness",
                      "infomap")
 
 
-computeTrianglePartitionRatio <- function(graph){
-    return(0)
+computeTrianglePartitionRatio <- function(graph, communityMethod){
+    
+    numSubComm <- max(communityMethod$membership)
+    verticesMembership <- communityMethod$membership
+    verticesPos <- seq(length(V(graph)))
+    res = c()
+    for(subGIdx in seq(numSubComm)){
+        # Take the vertices on that subcommunity
+        vOfSubComm <- verticesPos[verticesMembership == subGIdx]
+        # Create subgraph of subcommunity subGIdx
+        subG = induced_subgraph(graph, vids = vOfSubComm)
+        tri = sum(count_triangles(subG)) # Sum of all the vertices triangles
+        metric = tri / numSubComm
+        res = append(res, metric) 
+    }
+    
+    # TODO: Check how to adapt metric for whole network
+    res <- sum(res)
+    return(res)
 }
 
 computeExpansion <- function(graph){
@@ -73,6 +90,7 @@ computeTableForGraph <- function(graph){
     communities = computeDiffCommunities(graph)
     resTable <- data.table("Method" = character(),
                            "TBT" = numeric(),
+                           "Expansion" = numeric(),
                            "Conductance" = numeric(),
                            "Modularity" = numeric(),
         stringsAsFactors = FALSE)
@@ -82,23 +100,13 @@ computeTableForGraph <- function(graph){
         
         c <- communities[i]; c <- c[[1]] # Dealing with the list messing up w/ the structure
         
-        numSubComm <- max(c$membership)
-        verticesMembership <- c$membership
-        
-        
-        for(subGIdx in seq(numSubComm)){
-            # Take the vertices on that subcommunity
-            vOfSubComm <- verticesPos[verticesMembership == subGIdx]
-            # Create subgraph of subcommunity subGIdx
-            subG = induced_subgraph(graph, vids = vOfSubComm)
-        }
-        
         name <- communitiesNames[i]
-        TPT <- computeTrianglePartitionRatio(c)
+        TPT <- computeTrianglePartitionRatio(graph, c)
         expansion <- computeExpansion(c)
+        conduct <- computeConductance(c)
         mod <- computeModularity(c)
         
-        resTable <- rbind(resTable, list(name, TPT, expansion, mod))
+        resTable <- rbind(resTable, list(name, TPT, expansion, conduct, mod))
     }
 }
 

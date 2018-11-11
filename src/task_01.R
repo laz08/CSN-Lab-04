@@ -15,7 +15,7 @@ rm(requiredPackages)
 ## Working directory
 wd = getwd()
 if(grepl("nora", wd)) {
-    setwd("~/Documents/18-19/ASM/HW/04")
+    setwd("~/Documents/18-19/CSN/LABS/04/src")
 } else {
     ## Put working path for Carolina
 }
@@ -68,21 +68,39 @@ computeModularity <- function(graph){
 }
 
 
-communities = computeDiffCommunities(karate)
-resTable <- data.table("Method" = character(),
-                       "TBT" = numeric(),
-                       "Conductance" = numeric(),
-                       "Modularity" = numeric(),
-    stringsAsFactors = FALSE)
+computeTableForGraph <- function(graph){
 
-for(i in seq(length(communities))){
+    communities = computeDiffCommunities(graph)
+    resTable <- data.table("Method" = character(),
+                           "TBT" = numeric(),
+                           "Conductance" = numeric(),
+                           "Modularity" = numeric(),
+        stringsAsFactors = FALSE)
     
-    c <- communities[i]
-    
-    name <- communitiesNames[i]
-    TPT <- computeTrianglePartitionRatio(c)
-    expansion <- computeExpansion(c)
-    mod <- computeModularity(c)
-    
-    resTable <- rbind(resTable, list(name, TPT, expansion, mod))
+    verticesPos <- seq(length(V(graph)))
+    for(i in seq(length(communities))){
+        
+        c <- communities[i]; c <- c[[1]] # Dealing with the list messing up w/ the structure
+        
+        numSubComm <- max(c$membership)
+        verticesMembership <- c$membership
+        
+        
+        for(subGIdx in seq(numSubComm)){
+            # Take the vertices on that subcommunity
+            vOfSubComm <- verticesPos[verticesMembership == subGIdx]
+            # Create subgraph of subcommunity subGIdx
+            subG = induced_subgraph(graph, vids = vOfSubComm)
+        }
+        
+        name <- communitiesNames[i]
+        TPT <- computeTrianglePartitionRatio(c)
+        expansion <- computeExpansion(c)
+        mod <- computeModularity(c)
+        
+        resTable <- rbind(resTable, list(name, TPT, expansion, mod))
+    }
 }
+
+graph = karate
+computeTableForGraph(karate)

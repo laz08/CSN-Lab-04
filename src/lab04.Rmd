@@ -27,20 +27,31 @@ plot(wc, karate)
 
 
 ```{r}
-ebet <- edge.betweenness.community(karate)
-fastgreed <- fastgreedy.community(karate)
-labelprop <- label.propagation.community(karate)
-ev <- leading.eigenvector.community(karate)
-multilevel <- multilevel.community(karate)
-optimal <- optimal.community(karate)
-spinglass <- spinglass.community(karate)
-walktrap <- walktrap.community(karate)
-infomap <- infomap.community(karate)
+
+
+communities <- function(karate) {
+  return (c(
+  edge.betweenness.community(karate),
+  fastgreedy.community(karate),
+  label.propagation.community(karate),
+  leading.eigenvector.community(karate),
+  multilevel.community(karate),
+  optimal.community(karate),
+  spinglass.community(karate),
+  walktrap.community(karate),
+  infomap.community(karate)))
+}
+
+
 ```
 
 
 ```{r}
-membership(ebet)
+coms <- communities (karate)
+for(c in coms){
+  #subcoms
+}
+
 
 ```
 

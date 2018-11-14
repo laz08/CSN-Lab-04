@@ -15,7 +15,7 @@ rm(requiredPackages)
 ## Working directory
 wd = getwd()
 if(grepl("nora", wd)) {
-    setwd("~/Documents/18-19/CSN/LABS/04/src")
+    setwd("~/Documents/18-19/CSN/LABS/04/data")
 } else {
     ## Put working path for Carolina
 }
@@ -29,15 +29,49 @@ wc <- walktrap.community(karate)
 (membership(wc))
 plot(wc, karate)
 
-computeDiffCommunities <- function(graph) {
-    return (list(edge.betweenness.community(graph),
-                 fastgreedy.community(graph),
-                 label.propagation.community(graph),
-                 leading.eigenvector.community(graph),
-                 multilevel.community(graph),
-                 spinglass.community(graph),
-                 walktrap.community(graph),
-                 infomap.community(graph)))
+computeDiffCommunities <- function(graph, communitiesNames) {
+    
+    times = list()
+    startTime = as.numeric(Sys.time())
+    
+    eb = edge.betweenness.community(graph)
+    times = append(times, as.numeric(Sys.time()) - startTime )
+    startTime = as.numeric(Sys.time())
+    
+    fastgreedy = fastgreedy.community(graph)
+    times = append(times, as.numeric(Sys.time()) - startTime )
+    startTime = as.numeric(Sys.time())
+    
+    labelProp = label.propagation.community(graph)
+    times = append(times, as.numeric(Sys.time()) - startTime )
+    startTime = as.numeric(Sys.time())
+    
+    leadingEigen = leading.eigenvector.community(graph)
+    times = append(times, as.numeric(Sys.time()) - startTime )
+    startTime = as.numeric(Sys.time())
+    
+    multilevel = multilevel.community(graph)
+    times = append(times, as.numeric(Sys.time()) - startTime )
+    startTime = as.numeric(Sys.time())
+    
+    spinglass = spinglass.community(graph)
+    times = append(times, as.numeric(Sys.time()) - startTime )
+    startTime = as.numeric(Sys.time())
+    
+    walktrap = walktrap.community(graph)
+    times = append(times, as.numeric(Sys.time()) - startTime )
+    startTime = as.numeric(Sys.time())
+    
+    infomap = infomap.community(graph)
+    times = append(times, as.numeric(Sys.time()) - startTime )
+    
+    df = data.table("Method" = communitiesNames,
+                    "Elapsed time" = times,
+                    stringsAsFactors = FALSE)
+    
+    communitiesList = list(eb, fastgreedy, labelProp, leadingEigen, multilevel, spinglass, walktrap, infomap)
+    
+    return(list(df, communitiesList))
 }
 
 communitiesNames = c("edge.betweenness",
@@ -101,7 +135,6 @@ computeMetrics <- function(graph, communityMethod){
         conductances <- append(conductances, weightedConductance)
     }
     
-    # TODO: Check how to adapt metric for whole network
     res <- c(sum(triangles), sum(modularities), sum(conductances), sum(expansions))
     return(res)
 }
@@ -109,30 +142,51 @@ computeMetrics <- function(graph, communityMethod){
 
 computeTableForGraph <- function(graph){
 
-    communities = computeDiffCommunities(graph)
-    resTable <- data.table("Method" = character(),
-                           "TPT" = numeric(),
-                           "Expansion" = numeric(),
-                           "Conductance" = numeric(),
-                           "Modularity" = numeric(),
-        stringsAsFactors = FALSE)
+    results = computeDiffCommunities(graph, communitiesNames)
+    resTable = results[1][[1]]
+    #resTable <- data.table("Method" = character(),
+    #                       "TPT" = numeric(),
+    #                       "Expansion" = numeric(),
+    #                       "Conductance" = numeric(),
+    #                       "Modularity" = numeric(),
+    #    stringsAsFactors = FALSE)
     
-    verticesPos <- seq(length(V(graph)))
-    for(i in seq(length(communities))){
+    
+    metricsTPT = c()
+    metricsExpansion = c()
+    metricsConduct = c()
+    metricsModularity = c()
+    
+    for(i in seq(length(communitiesNames))){
         
-        c <- communities[i]; c <- c[[1]] # Dealing with the list messing up w/ the structure
-        
-        name <- communitiesNames[i]
+        #c <- communities[i]; c <- c[[1]] # Dealing with the list messing up w/ the structure
+        c <- results[2][[1]][[i]] # Dealing with the list messing up w/ the structure
+        # name <- communitiesNames[i]
         metrics <- computeMetrics(graph, c)
-        TPT <- metrics[1]
-        expansion <- metrics[4]
-        conduct <- metrics[3]
-        mod <- metrics[2]
-        
-        resTable <- rbind(resTable, list(name, TPT, expansion, conduct, mod))
+        metricsTPT = append(metricsTPT, metrics[1])
+        metricsExpansion = append(metricsExpansion, metrics[4])
+        metricsConduct = append(metricsConduct, metrics[3])
+        metricsModularity = append(metricsModularity, metrics[2])
     }
+    
+    resTable = cbind(resTable, "TPT" = metricsTPT)
+    resTable = cbind(resTable, "Expansion" = metricsExpansion)
+    resTable = cbind(resTable, "Conduct" = metricsConduct)
+    resTable = cbind(resTable, "Modularity" = metricsModularity)
     return (resTable)
 }
 
 graph = karate
+
+results = computeDiffCommunities(graph, communitiesNames)
+
 (t = computeTableForGraph(karate))
+
+wikiG <- read.graph("wikipedia.gml", format="gml")
+
+start = Sys.time()
+t = walktrap.community(wikiG)
+end = Sys.time()
+
+delta = end - start
+cat("Elapsed time: ", delta, "\n")

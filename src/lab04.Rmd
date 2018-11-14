@@ -1,58 +1,65 @@
 ---
-title: "CSN4"
-author: "Carolina Jorge"
-date: "6 de Novembro de 2018"
-output: html_document
+title: "CSN 04 - Community Detection Algorithms"
+author: "Carolina Jorge, Laura Cebollero"
+date: "14th of November, 2018"
+output: pdf_document
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+source("task_01.R")
+options(scipen=999)
+```
+```{r setup2, include=FALSE, echo=FALSE, cache=TRUE}
+walktrapCommsWiki = computeWalktrap(wikiG)
+```
+## Introduction
+
+In this lab we are asked to bla....
+
+
+# 1. Metrics
+We have ..........
+
+```{r  echo=FALSE}
+kable(karateMetricsTable)
+
 ```
 
-## R Markdown
+## Discussion on metrics
 
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+# 2. Wikipedia community detection
 
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+Now we are going to detect the communities on the Wikipedia dataset provided in `wikipedia.gml`.
 
+This whole network has X vertices and Y edges. Thus, we can see that this network is really large.
+
+Because of this, Edge betweeness as a community detection algorithm has been immediately discarded
+by us for its high computational demanding due to its inner working methods of removing one edge, computing the degrees, then restoring the removed edge and removing another one, compute again... And so on.
+
+Looking at the table 1 in the Metrics section, we can see that the fastest community detection algorithms are walktrap, multilevel, label, infomap and fastgreedy.
+
+Multilevel cannot be used because it needs the graph to be undirected and we are dealing, in fact,  with a directed graph.
+
+We have chosen to perform the community detection with Walktrap because it works like []
+
+Let's take a look at the total number of communities found with a function 
+we have implemented:
 ```{r}
-require(igraph)
-karate <- graph.famous("Zachary")
-wc <- walktrap.community(karate)
-(modularity(wc))
-(membership(wc))
-plot(wc, karate)
+printNumberOfCommunitiesFound(walktrapCommsWiki)
 ```
 
+We have tried to plot the whole graph but of course nothing can really be determined
+by looking at it, because it is very dense.
 
+TODO: Put graphic
 
-```{r}
-
-
-communities <- function(karate) {
-  return (c(
-  edge.betweenness.community(karate),
-  fastgreedy.community(karate),
-  label.propagation.community(karate),
-  leading.eigenvector.community(karate),
-  multilevel.community(karate),
-  optimal.community(karate),
-  spinglass.community(karate),
-  walktrap.community(karate),
-  infomap.community(karate)))
-}
-
-
+Because of this we are only going to take a look at the first 3 communities detected.
+```{r   out.width="350px", out.height="350px", fig.align='center'}
+x = 3
+plotGraphFirstXCommunities(walktrapCommsWiki, wikiG, x)
 ```
 
+# Summary
 
-```{r}
-coms <- communities (karate)
-for(c in coms){
-  #subcoms
-}
-
-
-```
-
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+TODO: write discussions of problems encountered & things learned

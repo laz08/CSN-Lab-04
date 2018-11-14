@@ -1,5 +1,5 @@
 # Load and install necessary packages
-requiredPackages <- c("igraph", "data.table")
+requiredPackages <- c("igraph", "data.table", "knitr")
 
 for (pac in requiredPackages) {
     if(!require(pac,  character.only=TRUE)){
@@ -21,14 +21,19 @@ if(grepl("nora", wd)) {
 }
 rm(wd)
 
+
 ####################
+###### FLAGS #######
+####################
+PRINT_PLOTS = FALSE
+TEST_ZACHARY = FALSE
+COMPUTE_WIKI_COMMS = FALSE
+###################
+###################
 
-karate <- graph.famous("Zachary")
-wc <- walktrap.community(karate)
-(modularity(wc))
-(membership(wc))
-plot(wc, karate)
-
+################
+### FUNCTIONS
+### ############
 computeDiffCommunities <- function(graph, communitiesNames) {
     
     times = list()
@@ -64,7 +69,7 @@ computeDiffCommunities <- function(graph, communitiesNames) {
     
     infomap = infomap.community(graph)
     times = append(times, as.numeric(Sys.time()) - startTime )
-    
+    times = round(as.numeric(times), 5)
     df = data.table("Method" = communitiesNames,
                     "Elapsed time" = times,
                     stringsAsFactors = FALSE)
@@ -143,14 +148,7 @@ computeMetrics <- function(graph, communityMethod){
 computeTableForGraph <- function(graph){
 
     results = computeDiffCommunities(graph, communitiesNames)
-    resTable = results[1][[1]]
-    #resTable <- data.table("Method" = character(),
-    #                       "TPT" = numeric(),
-    #                       "Expansion" = numeric(),
-    #                       "Conductance" = numeric(),
-    #                       "Modularity" = numeric(),
-    #    stringsAsFactors = FALSE)
-    
+    resTable = results[1][[1]] # Dealing with the list messing up w/ the structure
     
     metricsTPT = c()
     metricsExpansion = c()
@@ -159,9 +157,8 @@ computeTableForGraph <- function(graph){
     
     for(i in seq(length(communitiesNames))){
         
-        #c <- communities[i]; c <- c[[1]] # Dealing with the list messing up w/ the structure
         c <- results[2][[1]][[i]] # Dealing with the list messing up w/ the structure
-        # name <- communitiesNames[i]
+        
         metrics <- computeMetrics(graph, c)
         metricsTPT = append(metricsTPT, metrics[1])
         metricsExpansion = append(metricsExpansion, metrics[4])
@@ -176,17 +173,68 @@ computeTableForGraph <- function(graph){
     return (resTable)
 }
 
+##############################
+##############################
+
+karate <- graph.famous("Zachary")
+
+if(TEST_ZACHARY){
+    wc <- walktrap.community(karate)
+    (modularity(wc))
+    (membership(wc))
+    plot(wc, karate)
+}
+
 graph = karate
+karateMetricsTable = computeTableForGraph(karate)
 
-results = computeDiffCommunities(graph, communitiesNames)
 
-(t = computeTableForGraph(karate))
+
+
+
+#### Task 02
+computeWalktrap <- function(graph){
+    start = Sys.time()
+    walktrapComms = walktrap.community(graph)
+    end = Sys.time()
+    
+    delta = end - start
+    cat("Elapsed time: ", delta, "\n")
+    return(walktrapComms)
+}
+
+
+printNumberOfCommunitiesFound <- function(communities){
+    numSubComm <- max(communities$membership)
+    cat("Total number of communities found: ", numSubComm, "\n")
+}
+
+plotGraphFirstXCommunities <- function(communities, graph, x) {
+  
+    #par(mfrow=c(1,2))
+    
+  verticesMembership <- communities$membership
+  verticesPos <- seq(length(communities$membership))
+  
+  for(subGIdx in seq(x)){
+      # Take the vertices on that subcommunity
+      vOfSubComm <- verticesPos[verticesMembership == subGIdx]
+      # Create subgraph of subcommunity subGIdx
+      subG = induced_subgraph(graph, vids = vOfSubComm)
+      plot(subG, main=paste("Plot of community", subGIdx))
+      box(which="plot")
+  }
+
+}
+
+
 
 wikiG <- read.graph("wikipedia.gml", format="gml")
+if(COMPUTE_WIKI_COMMS){
+    walktrapCommsWiki = computeWalktrap(wikiG)    
+}
 
-start = Sys.time()
-t = walktrap.community(wikiG)
-end = Sys.time()
 
-delta = end - start
-cat("Elapsed time: ", delta, "\n")
+if(PRINT_PLOTS){
+    plotGraphFirstXCommunities(walktrapCommsWiki, wikiG, 4)
+}

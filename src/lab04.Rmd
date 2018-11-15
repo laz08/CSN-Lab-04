@@ -10,16 +10,54 @@ knitr::opts_chunk$set(echo = TRUE)
 source("task_01.R")
 options(scipen=999)
 ```
-```{r setup2, include=FALSE, echo=FALSE, cache=TRUE}
+```{r setup2, include=FALSE, echo=FALSE, cache=FALSE}
 walktrapCommsWiki = computeWalktrap(wikiG)
 ```
 ## Introduction
 
-In this lab we are asked to bla....
+In this lab we are asked to run and compare different community finding algorithms. In _igraph_ pack it is possible to find already some of these algorithms implemented so we will make use of them. Once we have the communities, we are asked to compute metrics on the communities and, consequently, on the graph. These metrics are *Triangle Partition Ratio (TPT)*, *expansion*, *conductance* and *modularity*. Once computed for each community, we use an weighted average to calculate the global values for the whole network.
+
+# 1. Finding Communities
+
+As proposed, we have used _igraph_'s algorithms *edge.betweeness.community*, *fastgreedy.community*, *label.propagation.community*, *leading.eigenvector.community*, *multilevel.community*, *spinglass.community*, *walktrap.community* and *infomap.community* to find communities in our data.
+
+*  In *edge.betweeness.community*, edges are removed in the decreasing order of their edge betweenness scores, recomputing every time an edge is removed the betweenness scores.
+
+*  *fastgreedy.community* tries to optimize a quality function called modularity in a greedy manner. Modularity, as we will see in the next section, is the difference between the number of edges in community C and the expected number of expected edges $E[mc]$ of a random graph with the same degree distribution. In other words, it tried to find zones in the network with greater density of edges.
+
+*  *label.propagation.community* tries to assign k labels the nodes of the network. The method then proceeds iteratively and re-assigns labels to nodes in a way that each node takes the most frequent label of its neighbors in a synchronous manner. 
+
+*  *leading.eigenvector.community* also tries to optimize the modularity funtion through the evaluation of the eigenvector of the modularity matrix.
+
+*  In *multilevel.community* nodes are moved between communities such that each node makes a local decision that maximizes its own contribution to the modularity score.
+
+*  *spinglass.community* simmulates the physical _spin_ property and at let the interactions between the nodes (particles) decide how to define a community.
+
+*  *walktrap.community* works based on random walks. It concludes that some walks are more likely to stay within the same community because there are only a few edges that lead outside a given community. Walktrap runs short random walks and uses the results of these random walks to merge separate communities in a bottom-up manner like fastgreedy.community algorithm.
+
+*  *infomap.community* based on information theoretic principles, it tries to build a grouping which provides the shortest description length for a random walk on the graph, where the description length is measured by the expected number of bits per vertex required to encode the path of a random walk.
+
+(All the information can be found either in the slides or https://stackoverflow.com/questions/9471906/what-are-the-differences-between-community-detection-algorithms-in-igraph or https://www.r-bloggers.com/summary-of-community-detection-algorithms-in-igraph-0-6/ and respective pointed papers.)
+
+# 2. Metrics
+
+We have calculates the metrics following these definitions:
+
+*  *Triangle partition ratio*: fraction of nodes in C that belong to a triad.
+
+*  *conductance*: fraction of total edge volume that points outside the cluster. To find the total edge volume that point outside the cluster, we calculate the difference between the total number of _outedges_ of the nodes of the community and the number of edges inside the community.
+
+*  *modularity*: difference between the number of edges in C and the expected number of edges E[mc] of a random graph with the same degree distribution. As we cannot suppose the type of data we are going to get, and so we cannot infer the type of graph, we calculate the expected number of edges in a simple way, being: 
+
+TODO: find expression for expected edges!
 
 
-# 1. Metrics
-We have ..........
+After computing the metrics for each community, we use an weighted average to calculate the global values for the whole network. This being:
+
+[\ 
+metric(G) = \sum_{C \in comm(G)} \frac{n_C}{n}*metric(C)
+\],
+where $n_C$ is the number of nodes of C and $n$ is the number of total nodes of the network.
 
 ```{r  echo=FALSE}
 kable(karateMetricsTable)
@@ -31,17 +69,17 @@ kable(karateMetricsTable)
 # 2. Wikipedia community detection
 
 Now we are going to detect the communities on the Wikipedia dataset provided in `wikipedia.gml`.
-
+TODO: check X and Y
 This whole network has X vertices and Y edges. Thus, we can see that this network is really large.
 
 Because of this, Edge betweeness as a community detection algorithm has been immediately discarded
-by us for its high computational demanding due to its inner working methods of removing one edge, computing the degrees, then restoring the removed edge and removing another one, compute again... And so on.
+by us for its high computational demanding due to its inner working methods of computing the betweenesses, removing the edge with the highest betweeness, recomputing the betweenesses, then removed edge and removing another one, compute again... And so on. (from https://arxiv.org/pdf/cond-mat/0112110.pdf)
 
 Looking at the table 1 in the Metrics section, we can see that the fastest community detection algorithms are walktrap, multilevel, label, infomap and fastgreedy.
 
-Multilevel cannot be used because it needs the graph to be undirected and we are dealing, in fact,  with a directed graph.
+Multilevel cannot be used because it needs the graph to be undirected and we are dealing, in fact, with a directed graph.
 
-We have chosen to perform the community detection with Walktrap because it works like []
+We have chosen to perform the community detection with Walktrap because it works based on random walks. It concludes that some walks are more likely to stay within the same community because there are only a few edges that lead outside a given community. Walktrap runs short random walks and uses the results of these random walks to merge separate communities in a bottom-up manner like fastgreedy.community algorithm.
 
 Let's take a look at the total number of communities found with a function 
 we have implemented:

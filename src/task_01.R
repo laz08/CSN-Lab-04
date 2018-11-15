@@ -17,7 +17,7 @@ wd = getwd()
 if(grepl("nora", wd)) {
     setwd("~/Documents/18-19/CSN/LABS/04/data")
 } else {
-    ## Put working path for Carolina
+    setwd("~/Documents/FEUP/5A/1S/CSN/Lab/Lab04/CSN-Lab-04/data")
 }
 rm(wd)
 
@@ -112,7 +112,8 @@ computeMetrics <- function(graph, communityMethod){
         nc <- length(V(subG))
         
         #TRIANGLES
-        tri = sum(count_triangles(subG)) # Sum of all the vertices triangles
+        alltriad = count_triangles(subG)
+        tri = length(alltriad[alltriad > 0]) # count vertices that belong to triangles
         tpt = tri / numSubComm
         weightedTPT = tpt * (nc/n)
         triangles = append(triangles, weightedTPT) 

@@ -120,7 +120,10 @@ computeMetrics <- function(graph, communityMethod){
         
         #EXPANSION
         # Number of edges outside the graph
-        fc = sum(degree(graph, vOfSubComm)) - mc # Original degrees of those nodes - current edges
+        subdegree <- degree(subG)
+        subsetOrgDegrees <- degrees[verticesMembership == subGIdx]
+        difdegree <- subsetOrgDegrees - subdegree
+        fc <- sum(difdegree)
         expansion <- fc/nc
         weightedExpansion <- expansion * (nc/n)
         expansions <- append(expansions, weightedExpansion)

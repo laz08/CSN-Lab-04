@@ -10,7 +10,7 @@ knitr::opts_chunk$set(echo = TRUE)
 source("task_01.R")
 options(scipen=999)
 ```
-```{r setup2, include=FALSE, echo=FALSE, cache=FALSE}
+```{r setup2, include=FALSE, echo=FALSE, cache=TRUE}
 walktrapCommsWiki = computeWalktrap(wikiG)
 ```
 ## Introduction
@@ -54,7 +54,7 @@ TODO: find expression for expected edges!
 
 After computing the metrics for each community, we use an weighted average to calculate the global values for the whole network. This being:
 
-[\ 
+\[ 
 metric(G) = \sum_{C \in comm(G)} \frac{n_C}{n}*metric(C)
 \],
 where $n_C$ is the number of nodes of C and $n$ is the number of total nodes of the network.

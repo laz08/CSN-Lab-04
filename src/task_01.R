@@ -114,16 +114,14 @@ computeMetrics <- function(graph, communityMethod){
         #TRIANGLES
         alltriad = count_triangles(subG)
         tri = length(alltriad[alltriad > 0]) # count vertices that belong to triangles
-        tpt = tri / numSubComm
+        tpt = tri / nc
         weightedTPT = tpt * (nc/n)
         triangles = append(triangles, weightedTPT) 
         
         #EXPANSION
-        subdegree <- degree(subG)
-        subsetOrgDegrees <- degrees[verticesMembership == subGIdx]
-        difdegree <- subsetOrgDegrees - subdegree
-        fc <- sum(difdegree)
-        expansion <- fc/numSubComm
+        # Number of edges outside the graph
+        fc = sum(degree(graph, vOfSubComm)) - mc # Original degrees of those nodes - current edges
+        expansion <- fc/nc
         weightedExpansion <- expansion * (nc/n)
         expansions <- append(expansions, weightedExpansion)
         
@@ -141,7 +139,7 @@ computeMetrics <- function(graph, communityMethod){
         conductances <- append(conductances, weightedConductance)
     }
     
-    res <- c(sum(triangles), sum(modularities), sum(conductances), sum(expansions))
+    res <- c(sum(triangles), modularity(communityMethod), sum(conductances), sum(expansions))
     return(res)
 }
 
@@ -181,6 +179,7 @@ karate <- graph.famous("Zachary")
 
 if(TEST_ZACHARY){
     wc <- walktrap.community(karate)
+    
     (modularity(wc))
     (membership(wc))
     plot(wc, karate)

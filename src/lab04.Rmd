@@ -59,7 +59,7 @@ After computing the metrics for each community, we have used a weighted average 
 
 \[ 
 metric(G) = \sum_{C \in comm(G)} \frac{n_C}{n}*metric(C)
-\],
+\]
 where $n_C$ is the number of nodes of community C and $n$ is the number of total nodes of the whole network.
 
 Additionally, we will also compute the elapsed time on computing the communities with each different algorithms to detect which ones are faster and which ones slower, thus less eficient time-wise.
@@ -69,41 +69,108 @@ Finally, we will also reflect how many communities have been found on each algor
 
 ## 2.1. Metrics applied on different graphs
 
-To have a general vision on how these community algorithms work in practice, we are going to use them on 4 different networks:
+To have a general vision on how these community algorithms work in practice, we are going to use them on 5 different networks:
 
 - *Zachary*, which is a famous social network of 34 members from a Karate group.
 - *Tutte*, Tait's Hamiltonian graph conjecture, which staates that  every 3-connected 3-regular planar graph is Hamiltonian. \footnote{As per igraph documentation}
 - *Coxeter*, a non-Hamiltonian cubic symmetric graph with 28 vertices and 42 edges. \footnote{As per igraph documentation}
 - A *modified Thomassen* network. Thomassen is the smallest hypotracable graph. Hypotraceable means that  it does not have a Hamiltonian path. But if a single vertex is removed, the graph now has a Hamiltonian path. We have modified it by adding to it 2 full graphs: one with 5 vertices and another one with 10.
-- A graph made with *3 full-connected graphs*, connected with by 2 edges.
+- A graph made with *3 full-connected graphs*, connected between them by 2 edges.
 
 The summary of each graph can be seen in the table below. We have computed the average vertex degree as well as their density:
 
 ```{r  echo=FALSE}
-kable(summaryTable)
+kable(summaryTable,
+            caption="\\label{tab:table1}Summary table of each graph",
+      col.names = c("Graph", "N", "E", "$\\langle k \\rangle$", "$\\delta$"),
+      align=rep('c', 5))
 ```
 
 
+## Zachary Network
 
-### Zachary Network
+```{r   echo=FALSE, out.width="150px", out.height="150px", fig.align="center"}
+plotGraphBeautifully(karate)
+```
 
 ```{r  echo=FALSE}
-plot.igraph(karate,layout=layout.auto,vertex.size=23,vertex.label.color="yellow",vertex.shape = "sphere", vertex.label.font=2,vertex.color="darkblue",edge.color="black")
+kable(karateMetricsTable,
+      caption="\\label{tab:tableZachary} Zachary community metrics",
+      col.names = c("Method", "$\\Delta$ time", "# $C$", "TPT", "Expansion", "Conduct", "Modularity"))
+```
+
+
+## Tutte
+```{r   echo=FALSE, out.width="150px", out.height="150px", fig.align="center"}
+plotGraphBeautifully(tutte)
 ```
 
 ```{r  echo=FALSE}
-kable(karateMetricsTable)
+kable(tutteMetricsTable,
+      caption="\\label{tab:tableTutte} Tutte community metrics",
+      col.names = c("Method", "$\\Delta$ time", "# $C$", "TPT", "Expansion", "Conduct", "Modularity"))
 ```
 
+
+## Coxeter
+```{r   echo=FALSE, out.width="150px", out.height="150px", fig.align="center"}
+plotGraphBeautifully(coxeter)
+```
+
+```{r  echo=FALSE}
+kable(coxeterMetricsTable,
+      caption="\\label{tab:tableCoxeter} Coxeter community metrics",
+      col.names = c("Method", "$\\Delta$ time", "# $C$", "TPT", "Expansion", "Conduct", "Modularity"))
+```
+
+
+## Modified Thomassen
+```{r   echo=FALSE, out.width="150px", out.height="150px", fig.align="center"}
+plotGraphBeautifully(Thomassen)
+```
+
+```{r  echo=FALSE}
+kable(modThomassenMetricsTable,
+      caption="\\label{tab:tableThomas} Modified Thomassen community metrics",
+      col.names = c("Method", "$\\Delta$ time", "# $C$", "TPT", "Expansion", "Conduct", "Modularity"))
+```
+
+
+## Three full connected graphs
+```{r   echo=FALSE, out.width="150px", out.height="150px", fig.align="center"}
+plotGraphBeautifully(full3Graphs)
+```
+
+```{r  echo=FALSE}
+kable(full3MetricsTable,
+      caption="\\label{tab:table3f} Three full connected graphs community metrics",
+      col.names = c("Method", "$\\Delta$ time", "# $C$", "TPT", "Expansion", "Conduct", "Modularity"))
+```
+
+
+## Metrics discussion
+
+TODO 
 
 # 2. Wikipedia community detection
 
 Now we are going to detect the communities on the Wikipedia dataset provided in `wikipedia.gml`.
-TODO: check X and Y
-This whole network has X vertices and Y edges. Thus, we can see that this network is really large.
 
-Because of this, Edge betweeness as a community detection algorithm has been immediately discarded
-by us for its high computational demanding due to its inner working methods of computing the betweenesses, removing the edge with the highest betweeness, recomputing the betweenesses, then removed edge and removing another one, compute again... And so on. (from https://arxiv.org/pdf/cond-mat/0112110.pdf)
+```{r  echo=FALSE, cache=TRUE}
+kable(computeSummaryTableForWiki(wikiG),
+            caption="\\label{tab:tableWiki}Summary table of Wikipedia graph",
+      col.names = c("Graph", "N", "E", "$\\langle k \\rangle$", "$\\delta$"),
+      align=rep('c', 5))
+```
+
+We can see that this network is really large albeit not that dense. It seems that as of the average, each article is connected to 6 other articles.
+
+
+Due to its size, *edge betweeness* as a community detection algorithm has been immediately discarded
+by us for it is high computational demanding due to its inner working methods of computing the betweenesses, removing the edge with the highest betweeness, recomputing the betweenesses, then removed edge and removing another one, compute again... And so on. \footnote{(from https://arxiv.org/pdf/cond-mat/0112110.pdf)}
+
+
+TODO: REVISE to which table we are refering to.
 
 Looking at the table 1 in the Metrics section, we can see that the fastest community detection algorithms are walktrap, multilevel, label, infomap and fastgreedy.
 
@@ -131,3 +198,10 @@ plotGraphFirstXCommunities(walktrapCommsWiki, wikiG, x)
 # Summary
 
 TODO: write discussions of problems encountered & things learned
+
+
+\newpage
+
+# References
+
+TODO. Replace footnotes!

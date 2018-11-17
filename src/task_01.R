@@ -174,7 +174,7 @@ computeTableForGraph <- function(graph){
 
 computeSummaryTable <- function(graphs){
     
-    graphsNames = c("Zachary", "Tutte", "Coxeter", "Modified Thomassen", "4 full C.")
+    graphsNames = c("Zachary", "Tutte", "Coxeter", "Modified Thomassen", "3 full conn. graphs")
     table <- data.table("Graph" = character(),
                         "N" = numeric(),
                         "E" = numeric(),
@@ -192,10 +192,38 @@ computeSummaryTable <- function(graphs){
         k = 2*E/N
         delta = 2*E/(N * (N-1))
         
-        table <- rbind(table, list(gName, N, E, k, delta))
+        table <- rbind(table, list(gName, N, E, round(k, 2), round(delta, 2)))
     }
     return(table)
 }
+
+computeSummaryTableForWiki <- function(wikiG){
+    
+
+    table <- data.table("Graph" = character(),
+                        "N" = numeric(),
+                        "E" = numeric(),
+                        "k" = numeric(),
+                        "delta" = numeric(),
+                        stringsAsFactors = FALSE)
+    
+    g = wikiG
+    gName = "Wikipedia"
+    
+    E = length(E(g))
+    N = length(V(g))
+    k = 2*E/N
+    delta = 2*E/(N * (N-1))
+    
+    table <- rbind(table, list(gName, N, E, round(k, 2), round(delta, 6)))
+        
+    return(table)
+}
+
+plotGraphBeautifully <- function(graph){
+    plot.igraph(graph,layout=layout.auto,vertex.size=23,vertex.label.color="yellow",vertex.shape = "sphere", vertex.label.font=2,vertex.color="darkblue",edge.color="black")
+}
+  
 
 
 ##############################
@@ -225,6 +253,10 @@ summaryTable <- computeSummaryTable(listOfG)
 ####################
 
 karateMetricsTable = computeTableForGraph(karate)
+tutteMetricsTable = computeTableForGraph(tutte)
+coxeterMetricsTable = computeTableForGraph(coxeter)
+modThomassenMetricsTable = computeTableForGraph(Thomassen)
+full3MetricsTable = computeTableForGraph(full3Graphs)
 
 #################################
 #################################
@@ -276,6 +308,8 @@ plotGraphFirstXCommunities <- function(communities, graph, x) {
 
 
 wikiG <- read.graph("wikipedia.gml", format="gml")
+
+wikiSummaryTable <- computeSummaryTableForWiki(wikiG)
 if(COMPUTE_WIKI_COMMS){
     walktrapCommsWiki = computeWalktrap(wikiG)    
 }

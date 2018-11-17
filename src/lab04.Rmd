@@ -15,11 +15,15 @@ walktrapCommsWiki = computeWalktrap(wikiG)
 ```
 ## Introduction
 
-In this lab we are asked to run and compare different community finding algorithms. In _igraph_ pack it is possible to find already some of these algorithms implemented so we will make use of them. Once we have the communities, we are asked to compute metrics on the communities and, consequently, on the graph. These metrics are *Triangle Partition Ratio (TPT)*, *expansion*, *conductance* and *modularity*. Once computed for each community, we use an weighted average to calculate the global values for the whole network.
+In this lab we are asked to run and compare different community finding algorithms. In _igraph_ package it is possible to find already some of these algorithms implemented, so we will make use of them. Once we have the communities, we are asked to compute metrics on the communities and, consequently, on the graph. These metrics are *Triangle Partition Ratio (TPT)*, *expansion*, *conductance* and *modularity*. Once computed for each community, we use an weighted average to calculate the global values for the whole network.
 
 # 1. Finding Communities
 
-As proposed, we have used _igraph_'s algorithms *edge.betweeness.community*, *fastgreedy.community*, *label.propagation.community*, *leading.eigenvector.community*, *multilevel.community*, *spinglass.community*, *walktrap.community* and *infomap.community* to find communities in our data.
+As proposed, we have used a total of 8 _igraph_'s  algorithms to find communities in our data.
+
+Before applying the different community algorithms, we have taken a brief look at each of their inner workings\footnote{
+http://www.cs.upc.edu/~CSN/slides/06communities.pdf} \footnote { https://stackoverflow.com/questions/9471906/what-are-the-differences-between-community-detection-algorithms-in-igraph}
+\footnote{ https://www.r-bloggers.com/summary-of-community-detection-algorithms-in-igraph-0-6/}:
 
 *  In *edge.betweeness.community*, edges are removed in the decreasing order of their edge betweenness scores, recomputing every time an edge is removed the betweenness scores.
 
@@ -37,34 +41,60 @@ As proposed, we have used _igraph_'s algorithms *edge.betweeness.community*, *fa
 
 *  *infomap.community* based on information theoretic principles, it tries to build a grouping which provides the shortest description length for a random walk on the graph, where the description length is measured by the expected number of bits per vertex required to encode the path of a random walk.
 
-(All the information can be found either in the slides or https://stackoverflow.com/questions/9471906/what-are-the-differences-between-community-detection-algorithms-in-igraph or https://www.r-bloggers.com/summary-of-community-detection-algorithms-in-igraph-0-6/ and respective pointed papers.)
+Please note that *optimal.community* has been deprecated and we have not been able to use it. Thus, we have discarded this method and not applied it.
 
 # 2. Metrics
 
-We have calculates the metrics following these definitions:
+We have computed the metrics following these definitions:
 
 *  *Triangle partition ratio*: fraction of nodes in C that belong to a triad.
 
 *  *conductance*: fraction of total edge volume that points outside the cluster. To find the total edge volume that point outside the cluster, we calculate the difference between the total number of _outedges_ of the nodes of the community and the number of edges inside the community.
 
-*  *modularity*: difference between the number of edges in C and the expected number of edges E[mc] of a random graph with the same degree distribution. As we cannot suppose the type of data we are going to get, and so we cannot infer the type of graph, we calculate the expected number of edges in a simple way, being: 
+*  *modularity*: difference between the number of edges in C and the expected number of edges E[mc] of a random graph with the same degree distribution.  In this case, we have used the already implemented modularity function of *igraph*.
 
-TODO: find expression for expected edges!
+* *expansion*: number of edges per node leaving the cluster.
 
-
-After computing the metrics for each community, we use an weighted average to calculate the global values for the whole network. This being:
+After computing the metrics for each community, we have used a weighted average to calculate the global values for the whole network. This being:
 
 \[ 
 metric(G) = \sum_{C \in comm(G)} \frac{n_C}{n}*metric(C)
 \],
-where $n_C$ is the number of nodes of C and $n$ is the number of total nodes of the network.
+where $n_C$ is the number of nodes of community C and $n$ is the number of total nodes of the whole network.
+
+Additionally, we will also compute the elapsed time on computing the communities with each different algorithms to detect which ones are faster and which ones slower, thus less eficient time-wise.
+
+Finally, we will also reflect how many communities have been found on each algorithm.
+
+
+## 2.1. Metrics applied on different graphs
+
+To have a general vision on how these community algorithms work in practice, we are going to use them on 4 different networks:
+
+- *Zachary*, which is a famous social network of 34 members from a Karate group.
+- *Tutte*, Tait's Hamiltonian graph conjecture, which staates that  every 3-connected 3-regular planar graph is Hamiltonian. \footnote{As per igraph documentation}
+- *Coxeter*, a non-Hamiltonian cubic symmetric graph with 28 vertices and 42 edges. \footnote{As per igraph documentation}
+- A *modified Thomassen* network. Thomassen is the smallest hypotracable graph. Hypotraceable means that  it does not have a Hamiltonian path. But if a single vertex is removed, the graph now has a Hamiltonian path. We have modified it by adding to it 2 full graphs: one with 5 vertices and another one with 10.
+- A graph made with *3 full-connected graphs*, connected with by 2 edges.
+
+The summary of each graph can be seen in the table below. We have computed the average vertex degree as well as their density:
+
+```{r  echo=FALSE}
+kable(summaryTable)
+```
+
+
+
+### Zachary Network
+
+```{r  echo=FALSE}
+plot.igraph(karate,layout=layout.auto,vertex.size=23,vertex.label.color="yellow",vertex.shape = "sphere", vertex.label.font=2,vertex.color="darkblue",edge.color="black")
+```
 
 ```{r  echo=FALSE}
 kable(karateMetricsTable)
-
 ```
 
-## Discussion on metrics
 
 # 2. Wikipedia community detection
 

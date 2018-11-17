@@ -101,8 +101,8 @@ computeMetrics <- function(graph, communityMethod){
     
     triangles = c()
     conductances <- c()
-    modularities <- c()
     expansions <- c()
+    
     for(subGIdx in seq(numSubComm)){
         # Take the vertices on that subcommunity
         vOfSubComm <- verticesPos[verticesMembership == subGIdx]
@@ -127,14 +127,7 @@ computeMetrics <- function(graph, communityMethod){
         expansion <- fc/nc
         weightedExpansion <- expansion * (nc/n)
         expansions <- append(expansions, weightedExpansion)
-        
-        
-        #MODULARITY
-        p <- m / ((1/2) * n * (n - 1))
-        expected <- p*((1/2) * nc * (nc - 1))
-        modularity <- (1/(4*m))*(mc - expected)
-        weightedModularity <- modularity * (nc/n)
-        modularities <- append(modularities, weightedModularity)
+      
         
         #CONDUCTANCE
         conductance <- fc/(fc + 2*(mc))
@@ -142,7 +135,7 @@ computeMetrics <- function(graph, communityMethod){
         conductances <- append(conductances, weightedConductance)
     }
     
-    res <- c(sum(triangles), modularity(communityMethod), sum(conductances), sum(expansions))
+    res <- c(sum(triangles), modularity(communityMethod), sum(conductances), sum(expansions), numSubComm)
     return(res)
 }
 
@@ -156,6 +149,7 @@ computeTableForGraph <- function(graph){
     metricsExpansion = c()
     metricsConduct = c()
     metricsModularity = c()
+    nrSubCommsFound = c()
     
     for(i in seq(length(communitiesNames))){
         
@@ -166,19 +160,74 @@ computeTableForGraph <- function(graph){
         metricsExpansion = append(metricsExpansion, metrics[4])
         metricsConduct = append(metricsConduct, metrics[3])
         metricsModularity = append(metricsModularity, metrics[2])
+        nrSubCommsFound = append(nrSubCommsFound, metrics[5])
     }
     
-    resTable = cbind(resTable, "TPT" = metricsTPT)
-    resTable = cbind(resTable, "Expansion" = metricsExpansion)
-    resTable = cbind(resTable, "Conduct" = metricsConduct)
-    resTable = cbind(resTable, "Modularity" = metricsModularity)
+    resTable = cbind(resTable, "# C" = nrSubCommsFound)
+    resTable = cbind(resTable, "TPT" = round(metricsTPT, 4))
+    resTable = cbind(resTable, "Expansion" = round(metricsExpansion, 4))
+    resTable = cbind(resTable, "Conduct" = round(metricsConduct, 4))
+    resTable = cbind(resTable, "Modularity" = round(metricsModularity, 4))
     return (resTable)
 }
 
+
+computeSummaryTable <- function(graphs){
+    
+    graphsNames = c("Zachary", "Tutte", "Coxeter", "Modified Thomassen", "4 full C.")
+    table <- data.table("Graph" = character(),
+                        "N" = numeric(),
+                        "E" = numeric(),
+                        "k" = numeric(),
+                        "delta" = numeric(),
+                        stringsAsFactors = FALSE)
+    
+    for (x in 1:length(graphsNames)){
+        
+        g = graphs[[x]]
+        gName = graphsNames[x]
+        
+        E = length(E(g))
+        N = length(V(g))
+        k = 2*E/N
+        delta = 2*E/(N * (N-1))
+        
+        table <- rbind(table, list(gName, N, E, k, delta))
+    }
+    return(table)
+}
+
+
 ##############################
 ##############################
 
+# Graphs to study
+
 karate <- graph.famous("Zachary")
+tutte <- graph.famous("Tutte")
+coxeter <- graph.famous("Coxeter")
+
+Thomassen <- graph.famous("Thomassen")
+Thomassen <- Thomassen + make_full_graph(5) + make_full_graph(10)
+Thomassen <- add_edges(Thomassen, c(34, 35, 37, 45))
+
+full3Graphs <- make_full_graph(10) + make_full_graph(10) +  make_full_graph(10) 
+full3Graphs <- add_edges(full3Graphs, c(10, 11, 20, 21))
+
+
+listOfG <- list(karate, tutte, coxeter, Thomassen, full3Graphs)
+
+
+# Making the metrics table
+summaryTable <- computeSummaryTable(listOfG)
+
+
+####################
+
+karateMetricsTable = computeTableForGraph(karate)
+
+#################################
+#################################
 
 if(TEST_ZACHARY){
     wc <- walktrap.community(karate)
@@ -187,12 +236,6 @@ if(TEST_ZACHARY){
     (membership(wc))
     plot(wc, karate)
 }
-
-graph = karate
-karateMetricsTable = computeTableForGraph(karate)
-
-
-
 
 
 #### Task 02

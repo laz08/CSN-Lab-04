@@ -299,7 +299,7 @@ plotGraphFirstXCommunities <- function(communities, graph, x) {
       vOfSubComm <- verticesPos[verticesMembership == subGIdx]
       # Create subgraph of subcommunity subGIdx
       subG = induced_subgraph(graph, vids = vOfSubComm)
-      plot(subG, main=paste("Plot of community", subGIdx))
+      plot(subG, main=paste("Plot of community", subGIdx), layout=layout.auto,vertex.size=23,vertex.label.color="darkblue",vertex.shape = "sphere", vertex.label.font=2,vertex.color="cyan",edge.color="black")
       box(which="plot")
   }
 

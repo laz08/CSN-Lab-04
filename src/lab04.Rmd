@@ -148,9 +148,26 @@ kable(full3MetricsTable,
 ```
 
 
-## Metrics discussion
+## 2.2. Metrics discussion
 
-TODO 
+We can see that in all networks, spinglass has been the slowest algorithm to compute the communities by a large margin.
+
+TPT has resulted in a 0 in the Tutte and Coxeter networks. This is due to the communities found in coxeter and Tutte not having any triads in any algorithm. 
+
+For example, let's look at those communities found with *walktrap* in Coxeter:
+
+```{r   echo=FALSE, out.width="200px", out.height="150px", fig.align="center"}
+walktrap = walktrap.community(coxeter)
+plot(walktrap, coxeter)
+```
+
+We can see that, as we thought, there are triads in the whole network. But once we apply the TPT to the communities found, these triads are, in fact, split by their vertices being from different communities.
+
+
+Leading has not found any communities in Tutte and Coxeter. So the evaluation of the eigenvector in the modularity matrix for these two networks has not been effective.
+
+In the case of the three full connected graph, the algorithms have found 3 communities each as we expected. There's is one exception, tho, which is the leading algorithm, which has found 4.
+
 
 # 2. Wikipedia community detection
 
@@ -167,16 +184,15 @@ We can see that this network is really large albeit not that dense. It seems tha
 
 
 Due to its size, *edge betweeness* as a community detection algorithm has been immediately discarded
-by us for it is high computational demanding due to its inner working methods of computing the betweenesses, removing the edge with the highest betweeness, recomputing the betweenesses, then removed edge and removing another one, compute again... And so on. \footnote{(from https://arxiv.org/pdf/cond-mat/0112110.pdf)}
+by us for it is high computational demanding due to its inner working methods of computing the betweenesses, removing the edge with the highest betweeness, recomputing the betweenesses, then restoring the edge and removing another one, compute again...[ And so on][ref]. 
 
-
-TODO: REVISE to which table we are refering to.
-
-Looking at the table 1 in the Metrics section, we can see that the fastest community detection algorithms are walktrap, multilevel, label, infomap and fastgreedy.
+Looking at the tables in the Metrics section, we can see that the fastest community detection algorithms are walktrap, multilevel, label, infomap and fastgreedy.
 
 Multilevel cannot be used because it needs the graph to be undirected and we are dealing, in fact, with a directed graph.
 
 We have chosen to perform the community detection with Walktrap because it works based on random walks. It concludes that some walks are more likely to stay within the same community because there are only a few edges that lead outside a given community. Walktrap runs short random walks and uses the results of these random walks to merge separate communities in a bottom-up manner like fastgreedy.community algorithm.
+
+\newpage
 
 Let's take a look at the total number of communities found with a function 
 we have implemented:
@@ -184,10 +200,14 @@ we have implemented:
 printNumberOfCommunitiesFound(walktrapCommsWiki)
 ```
 
-We have tried to plot the whole graph but of course nothing can really be determined
-by looking at it, because it is very dense.
+The number of communities found is quite large. As is the whole network. 
 
-TODO: Put graphic
+We have tried to plot the whole graph but of course nothing can really be determined
+by looking at it, because it is very crowded as seen in  figure 1.
+
+![Global graph plot](figures/walktrappComms_Plot.png)
+
+
 
 Because of this we are only going to take a look at the first 3 communities detected.
 ```{r   out.width="350px", out.height="350px", fig.align='center'}
@@ -195,13 +215,18 @@ x = 3
 plotGraphFirstXCommunities(walktrapCommsWiki, wikiG, x)
 ```
 
+
+
 # Summary
+
+Spinglass has proven to be the slowest method.
+
+Leading has found 4 communities instead of 3 in the 3 full connected graphs. And has found only 1 in Tutte and Coxeter. We are sure that this algorithm may prove effective with some specific networks. But it has proven not being that reliable for us in 3 out of 5 test cases.
+
+Future work would include taking a closer look on the leading algorithm implementation and research for which type of networks or goals it is useful to be applied.
 
 TODO: write discussions of problems encountered & things learned
 
-
-\newpage
-
 # References
 
-TODO. Replace footnotes!
+[ref]: https://arxiv.org/pdf/cond-mat/0112110.pdf "referenceees!"

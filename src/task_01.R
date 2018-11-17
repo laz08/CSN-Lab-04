@@ -287,14 +287,14 @@ printNumberOfCommunitiesFound <- function(communities){
     cat("Total number of communities found: ", numSubComm, "\n")
 }
 
-plotGraphFirstXCommunities <- function(communities, graph, x) {
+plotGraphSetOfCommunities <- function(communities, graph, vecToShow) {
   
     #par(mfrow=c(1,2))
     
   verticesMembership <- communities$membership
   verticesPos <- seq(length(communities$membership))
   
-  for(subGIdx in seq(x)){
+  for(subGIdx in vecToShow){
       # Take the vertices on that subcommunity
       vOfSubComm <- verticesPos[verticesMembership == subGIdx]
       # Create subgraph of subcommunity subGIdx

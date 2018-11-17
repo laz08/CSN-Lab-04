@@ -96,7 +96,7 @@ plotGraphBeautifully(karate)
 ```{r  echo=FALSE}
 kable(karateMetricsTable,
       caption="\\label{tab:tableZachary} Zachary community metrics",
-      col.names = c("Method", "$\\Delta$ time", "# $C$", "TPT", "Expansion", "Conduct", "Modularity"))
+      col.names = c("Method", "$\\Delta$ time", "# $C$", "TPT", "Expansion", "Conductance", "Modularity"))
 ```
 
 
@@ -108,7 +108,7 @@ plotGraphBeautifully(tutte)
 ```{r  echo=FALSE}
 kable(tutteMetricsTable,
       caption="\\label{tab:tableTutte} Tutte community metrics",
-      col.names = c("Method", "$\\Delta$ time", "# $C$", "TPT", "Expansion", "Conduct", "Modularity"))
+      col.names = c("Method", "$\\Delta$ time", "# $C$", "TPT", "Expansion", "Conductance", "Modularity"))
 ```
 
 
@@ -120,7 +120,7 @@ plotGraphBeautifully(coxeter)
 ```{r  echo=FALSE}
 kable(coxeterMetricsTable,
       caption="\\label{tab:tableCoxeter} Coxeter community metrics",
-      col.names = c("Method", "$\\Delta$ time", "# $C$", "TPT", "Expansion", "Conduct", "Modularity"))
+      col.names = c("Method", "$\\Delta$ time", "# $C$", "TPT", "Expansion", "Conductance", "Modularity"))
 ```
 
 
@@ -132,7 +132,7 @@ plotGraphBeautifully(Thomassen)
 ```{r  echo=FALSE}
 kable(modThomassenMetricsTable,
       caption="\\label{tab:tableThomas} Modified Thomassen community metrics",
-      col.names = c("Method", "$\\Delta$ time", "# $C$", "TPT", "Expansion", "Conduct", "Modularity"))
+      col.names = c("Method", "$\\Delta$ time", "# $C$", "TPT", "Expansion", "Conductance", "Modularity"))
 ```
 
 
@@ -144,7 +144,7 @@ plotGraphBeautifully(full3Graphs)
 ```{r  echo=FALSE}
 kable(full3MetricsTable,
       caption="\\label{tab:table3f} Three full connected graphs community metrics",
-      col.names = c("Method", "$\\Delta$ time", "# $C$", "TPT", "Expansion", "Conduct", "Modularity"))
+      col.names = c("Method", "$\\Delta$ time", "# $C$", "TPT", "Expansion", "Conductance", "Modularity"))
 ```
 
 
@@ -168,6 +168,14 @@ Leading has not found any communities in Tutte and Coxeter. So the evaluation of
 
 In the case of the three full connected graph, the algorithms have found 3 communities each as we expected. There's is one exception, tho, which is the leading algorithm, which has found 4.
 
+Generally, in all 5 networks, expansion is low except in Coxeter and Zachary. This means that not many edges per node are leaving the community detected by the algorithm, which is good. In case of Coxeter and Zachary, it seems that the communities found have nodes that are well-connected with others from different communities. Leading to a higher value.
+
+As for Conductance, it is kept pretty low in all networks (between 0.1 and 0.2), which means that the fraction of volum edges pointing outside the cluster is low.  It increases a little (0.4) in all methods in the case of Coxeter. Again, Coxeter seems to be pretty intertwined when creating the communities as seen in the figure above, so this does not surprise us.
+
+Finally, if we check modularity, it ranges from 0.3 to 0.6 in general. Their highest values are found on the three full connected graphs and the modified Thomassen. 
+It seems then that the difference between the expected number of edges of a random graph with the same distribution and our models' number of edges is greater.
+
+
 
 # 2. Wikipedia community detection
 
@@ -184,7 +192,8 @@ We can see that this network is really large albeit not that dense. It seems tha
 
 
 Due to its size, *edge betweeness* as a community detection algorithm has been immediately discarded
-by us for it is high computational demanding due to its inner working methods of computing the betweenesses, removing the edge with the highest betweeness, recomputing the betweenesses, then restoring the edge and removing another one, compute again...[ And so on][ref]. 
+by us for it is high computational demanding due to its inner working methods of computing the betweenesses, removing the edge with the highest betweeness, recomputing the betweenesses, then restoring the edge and removing another one, compute again...
+\footnote{https://arxiv.org/pdf/cond-mat/0112110.pdf}. 
 
 Looking at the tables in the Metrics section, we can see that the fastest community detection algorithms are walktrap, multilevel, label, infomap and fastgreedy.
 
@@ -192,7 +201,6 @@ Multilevel cannot be used because it needs the graph to be undirected and we are
 
 We have chosen to perform the community detection with Walktrap because it works based on random walks. It concludes that some walks are more likely to stay within the same community because there are only a few edges that lead outside a given community. Walktrap runs short random walks and uses the results of these random walks to merge separate communities in a bottom-up manner like fastgreedy.community algorithm.
 
-\newpage
 
 Let's take a look at the total number of communities found with a function 
 we have implemented:
@@ -202,31 +210,42 @@ printNumberOfCommunitiesFound(walktrapCommsWiki)
 
 The number of communities found is quite large. As is the whole network. 
 
-We have tried to plot the whole graph but of course nothing can really be determined
-by looking at it, because it is very crowded as seen in  figure 1.
+We have tried to plot the whole graph but of course nothing can really be determined by looking at it, because it is very crowded.
 
-![Global graph plot](figures/walktrappComms_Plot.png)
+Because of this we are only going to take a look some communities.
+The first two, the tenth, the 501st and two of the last ones.
 
-
-
-Because of this we are only going to take a look at the first 3 communities detected.
 ```{r   out.width="350px", out.height="350px", fig.align='center'}
-x = 3
-plotGraphFirstXCommunities(walktrapCommsWiki, wikiG, x)
+vec = c(1, 2, 10, 501, 3300, 3352)
+plotGraphSetOfCommunities(walktrapCommsWiki, wikiG, vec)
 ```
 
+We can see that the first ones are well-populated and the last communities do not have many nodes (either 2 or 1). Thus, it seems that the last communities found are articles unrelated to others.
+
+If we take a look at the first community, it seems that its center is Egyptology and the topics revolve around that articles. The articles shown are related to the topic so we think is community is pretty well-defined.
+
+Community 2 seems to have taken the randomized factor into account. On the upper-center we have the article *falling in love* and at the bottom-left we have *Image Constraint Token*. In the middle, their path contains:
+
+**Image Constraint Token** $\rightarrow$ Advanced Access Content System $\rightarrow$ Analog Hole Multimedia $\rightarrow$ Vulnerability $\leftarrow$ **Falling in love**. 
+
+So, since it is a directed graph, they are mainly connected by the Vulnerability topic.
 
 
-# Summary
+The tenth and 501st communities seems to have a central topic as the first one, which are the community topics and biometrics articles, respectively.
 
-Spinglass has proven to be the slowest method.
+
+
+
+# 3. Final brief summary
+
+Spinglass has proven to be the slowest method for creating communities.
 
 Leading has found 4 communities instead of 3 in the 3 full connected graphs. And has found only 1 in Tutte and Coxeter. We are sure that this algorithm may prove effective with some specific networks. But it has proven not being that reliable for us in 3 out of 5 test cases.
 
 Future work would include taking a closer look on the leading algorithm implementation and research for which type of networks or goals it is useful to be applied.
 
-TODO: write discussions of problems encountered & things learned
+Coxeter is an interesting network to work with. Their TPT is 0 because creating communities splits the existing TPT. It has been the exception in all metrics.
 
-# References
+Thomassen and three full connected graphs are the graphs with higher modularity. Probably because we forced the full connected graphs, which is greater than the expected value E[$m_{c}$]
 
-[ref]: https://arxiv.org/pdf/cond-mat/0112110.pdf "referenceees!"
+As for the wikipedia communities found with Walktrap, the articles grouped by it seem to be related. Thus the algorithm has worked well, at least in our opinion and having seen some communities randomly.
